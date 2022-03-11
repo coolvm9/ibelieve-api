@@ -15,7 +15,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: style-quiz-service
-      Handler: helloworld.App::handleRequest
+      Handler: StyleQuiz.App::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
