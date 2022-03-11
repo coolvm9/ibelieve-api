@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'ai.ibelieve'
+version 'SNAP-001'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+task wrapper(type: Wrapper){
+    gradleVersion = '7.4.1'
+}
