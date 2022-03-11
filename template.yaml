@@ -1,23 +1,42 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  ibelieve4
-
-  Sample SAM Template for ibelieve4
+ iBelieveAPIServicesStack
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 20
 
+  # API Gateway resource
+  # API Gateway resource
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Stage name to deploy resources to
+    Default: dev
+    AllowedValues:
+      - dev
+      - stage
+      - production
 Resources:
-  StyleQuizFunction:
+  ibelieveApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "ibelieveApi-${Stage}"
+      StageName: !Ref Stage
+      Variables:
+        LAMBDA_ALIAS: !Ref Stage
+      TracingEnabled: true
+
+  PostStyleQuizFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: StyleQuizFunction
+      FunctionName: PostStyleQuiz
       Description: Updates Style Quiz details into table
       CodeUri: style-quiz-service
-      Handler: com.ibelieve.StyleQuiz::handleRequest
+      Handler: ai.ibelieve.StyleQuizApp::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
@@ -29,28 +48,88 @@ Resources:
         Variables:
           STYLE_QUIZ_TABLE: StyleQuiz
       Events:
-        StyleQuiz:
+        StyleQuizApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /stylequiz/{quizId}
-            Method: get
-        StyleQuiz1:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /stylequiz
+            Path: /v1/stylequiz
             Method: post
-
-
+            RestApiId: !Ref ibelieveApi
+  GetStyleQuizFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: GetStyleQuiz
+      Description: Get StyleQuiz By ID
+      CodeUri: style-quiz-service
+      Handler: ai.ibelieve.StyleQuizApp::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        # Give the Lambda service access to poll your DynamoDB Stream
+        - AmazonDynamoDBFullAccess
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          STYLE_QUIZ_TABLE: StyleQuiz
+      Events:
+        StyleQuizApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /v1/stylequiz
+            Method: get
+            RestApiId: !Ref ibelieveApi
+  PostUserFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: PostUser
+      Description: Updates User details into table
+      CodeUri: user-service
+      Handler: ai.ibelieve.UserApp::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        # Give the Lambda service access to poll your DynamoDB Stream
+        - AmazonDynamoDBFullAccess
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          USER_TABLE: User
+      Events:
+        UserApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /v1/user
+            Method: post
+            RestApiId: !Ref ibelieveApi
+  GetUserFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: GetUser
+      Description: Get User By ID
+      CodeUri: user-service
+      Handler: ai.ibelieve.UserApp::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        # Give the Lambda service access to poll your DynamoDB Stream
+        - AmazonDynamoDBFullAccess
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          USER_TABLE: User
+      Events:
+        UserApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /v1/user
+            Method: get
+            RestApiId: !Ref ibelieveApi
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  StyleApiEndpoint:
+    Description: "API endpoint"
+    Value: !Sub "https://${ibelieveApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/v1/stylequiz"
+  UserApiEndpoint:
+    Description: "API endpoint"
+    Value: !Sub "https://${ibelieveApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/v1/user"

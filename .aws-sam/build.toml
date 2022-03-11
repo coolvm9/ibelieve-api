@@ -7,6 +7,14 @@ runtime = "java11"
 architecture = "x86_64"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["StyleQuizFunction"]
+functions = ["PostStyleQuizFunction", "GetStyleQuizFunction"]
+
+[function_build_definitions.6fda915a-908a-4439-8d9f-38eba6fd593e]
+codeuri = "D:\\dev spaces\\intelliJ Workspace\\ibelieve-api\\user-service"
+runtime = "java11"
+architecture = "x86_64"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["PostUserFunction", "GetUserFunction"]
 
 [layer_build_definitions]

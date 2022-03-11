@@ -1,6 +1,8 @@
-package com.ibelieve;
+package ai.ibelieve;
 
 
+import ai.ibelieve.db.DependencyFactory;
+import ai.ibelieve.entities.User;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -8,12 +10,10 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import com.ibelieve.db.DependencyFactory;
-
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.regions.Region;
 
 import java.util.HashMap;
@@ -22,21 +22,21 @@ import java.util.Map;
 /**
  * Handler for requests to Lambda function.
  */
-public class StyleQuiz implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class UserApp implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    com.ibelieve.entities.StyleQuiz styleQuiz;
+    ai.ibelieve.entities.User user;
     static final int STATUS_CODE_NO_CONTENT = 204;
     static final int STATUS_CODE_CREATED = 201;
     private final DynamoDbEnhancedClient dbClient;
-    private final String styleQuizTableName;
-    private final TableSchema<com.ibelieve.entities.StyleQuiz> styleQuizTableSchema;
+    private final String userTableName;
+    private final TableSchema<ai.ibelieve.entities.User> userTableSchema;
     private Map<String, String> headers = new HashMap<>();
 
-    public StyleQuiz() {
+    public UserApp() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
-        styleQuizTableName = DependencyFactory.styleQuizTableName();
-        styleQuizTableSchema = TableSchema.fromBean(com.ibelieve.entities.StyleQuiz.class);
+        userTableName = DependencyFactory.userTableName();
+        userTableSchema = TableSchema.fromBean(ai.ibelieve.entities.User.class);
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");
     }
@@ -48,23 +48,39 @@ public class StyleQuiz implements RequestHandler<APIGatewayProxyRequestEvent, AP
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
         String output = "EMPTY";
+        User user;
         try {
-
             if (input.getHttpMethod().equals("GET")){
                 System.out.println("GET");
-                output ="styleQ from Get";
+                Map<String, String> inputParams = input.getQueryStringParameters();
+                for (Map.Entry<String,String> entry : inputParams.entrySet())
+                    System.out.println("Key = " + entry.getKey() +
+                            ", Value = " + entry.getValue());
+                String userId = inputParams.get("userId");
+                String metadata = inputParams.get("metadata");
+
+                DynamoDbTable<User> styleQuizDynamoDbTable = dbClient.table(userTableName, TableSchema.fromBean(User.class));
+                Key key = Key.builder()
+                        .partitionValue(userId)
+                        .build();
+                output = gson.toJson(styleQuizDynamoDbTable.getItem(key));
             }
             if (input.getHttpMethod().equals("POST")){
+                user = gson.fromJson(input.getBody(), User.class);
+                if (user != null) {
+                    dbClient.table(userTableName, TableSchema.fromBean(User.class)).putItem(user);
+                }
                 System.out.println("POST");
-                output ="styleQ from Post";
+                System.out.println("TABLE NAME"  + userTableName);
+                output = input.getBody() ;
             }
             if (input.getHttpMethod().equals("DELETE")){
                 System.out.println("DELETE");
-                output ="styleQ from DELETE";
+                output ="User from DELETE";
             }
             if (input.getHttpMethod().equals("PUT")){
                 System.out.println("PUT");
-                output ="styleQ from PUT";
+                output ="USer from PUT";
             }
             int statusCode = STATUS_CODE_NO_CONTENT;
 

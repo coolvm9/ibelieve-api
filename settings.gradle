@@ -1,5 +1,5 @@
 rootProject.name='ibelieve-api'
 include 'user-service'
 include 'style-quiz-service'
-include 'app-core'
+include 'recommendation-service'
 

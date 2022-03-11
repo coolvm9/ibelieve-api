@@ -1,0 +1,4 @@
+sam local generate-event apigateway aws-proxy --method GET --path document --body "{"userId": "test", "styleQuizId": "2"}" > events/1local-event.json
+sam local invoke -d 5858 <function logical id>
+
+sam local start-api -d 5858
