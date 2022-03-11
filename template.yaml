@@ -26,9 +26,16 @@ Resources:
     Properties:
       Name: !Sub "ibelieveApi-${Stage}"
       StageName: !Ref Stage
+      Cors: "'*'"
       Variables:
         LAMBDA_ALIAS: !Ref Stage
       TracingEnabled: true
+      Auth:
+        DefaultAuthorizer: MyCognitoAuthorizer
+        Authorizers:
+          MyCognitoAuthorizer:
+            UserPoolArn: arn:aws:cognito-idp:us-west-1:470521481974:userpool/us-west-1_6NeBXCvcJ
+
 
   PostStyleQuizFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction

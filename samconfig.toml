@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+Stage = "stage"
+stack_name = "stylequizservice"
+s3_bucket = "satyalambdacode"
+s3_prefix = "stylequizservice"
+region = "us-west-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
