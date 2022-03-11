@@ -7,6 +7,6 @@ runtime = "java11"
 architecture = "x86_64"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["HelloWorldFunction"]
+functions = ["StyleQuizFunction"]
 
 [layer_build_definitions]

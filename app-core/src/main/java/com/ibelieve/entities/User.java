@@ -45,7 +45,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
           return userName;
       }
     public void setUserName(String userName) {
-        this.userName = "UserName#"+userName;
+        this.userName = userName;
     }
     @DynamoDbSortKey
     public String getMetadata() {

@@ -11,7 +11,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 public class DependencyFactory {
 
-    public static final String ENV_VARIABLE_TABLE = "TABLE";
+    public static final String ENV_VARIABLE_USER_TABLE = "USER_TABLE";
+    public static final String ENV_VARIABLE_STYLE_QUIZ_TABLE = "STYLE_QUIZ_TABLE";
 
     private DependencyFactory() {}
 
@@ -28,8 +29,11 @@ public class DependencyFactory {
                 .build();
     }
 
-    public static String tableName() {
-        return System.getenv(ENV_VARIABLE_TABLE);
+    public static String userTableName() {
+        return System.getenv(ENV_VARIABLE_USER_TABLE);
+    }
+    public static String styleQuizTableName() {
+        return System.getenv(ENV_VARIABLE_USER_TABLE);
     }
 
 }
