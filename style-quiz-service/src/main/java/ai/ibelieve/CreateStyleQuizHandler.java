@@ -1,7 +1,6 @@
 package ai.ibelieve;
 
 
-import ai.ibelieve.entities.StyleQuiz;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -11,34 +10,37 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 
-import ai.ibelieve.db.DependencyFactory;
+import ibelieve.db.DependencyFactory;
+import ibelieve.entities.IBelieveData;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Handler for requests to Lambda function.
  */
-public class StyleQuizApp implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class CreateStyleQuizHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    ai.ibelieve.entities.StyleQuiz styleQuiz;
+
     static final int STATUS_CODE_NO_CONTENT = 204;
     static final int STATUS_CODE_CREATED = 201;
     private final DynamoDbEnhancedClient dbClient;
-    private final String styleQuizTableName;
-    private final TableSchema<ai.ibelieve.entities.StyleQuiz> styleQuizTableSchema;
+    private final String tableName;
+    private final TableSchema<IBelieveData> styleQuizTableSchema;
     private Map<String, String> headers = new HashMap<>();
 
-    public StyleQuizApp() {
+    public CreateStyleQuizHandler() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
-        styleQuizTableName = DependencyFactory.styleQuizTableName();
-        styleQuizTableSchema = TableSchema.fromBean(ai.ibelieve.entities.StyleQuiz.class);
+        tableName = DependencyFactory.styleQuizTableName();
+        styleQuizTableSchema = TableSchema.fromBean(IBelieveData.class);
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");
     }
@@ -50,7 +52,7 @@ public class StyleQuizApp implements RequestHandler<APIGatewayProxyRequestEvent,
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
         String output = "EMPTY";
-        StyleQuiz styleQuiz;
+        IBelieveData data;
         try {
             if (input.getHttpMethod().equals("GET")){
                 System.out.println("GET");
@@ -59,21 +61,25 @@ public class StyleQuizApp implements RequestHandler<APIGatewayProxyRequestEvent,
                     System.out.println("Key = " + entry.getKey() +
                             ", Value = " + entry.getValue());
                 String userId = inputParams.get("userId");
-                String styleQuizId = inputParams.get("styleQuizId");
-                DynamoDbTable<StyleQuiz> styleQuizDynamoDbTable = dbClient.table(styleQuizTableName, TableSchema.fromBean(StyleQuiz.class));
+                String styleQuizId = inputParams.get("metadata");
+                DynamoDbTable<IBelieveData> table = dbClient.table(tableName, TableSchema.fromBean(IBelieveData.class));
                 Key key = Key.builder()
                         .partitionValue(userId)
                         .sortValue(styleQuizId)
                         .build();
-                output = gson.toJson(styleQuizDynamoDbTable.getItem(key));
+                output = gson.toJson(table.getItem(key));
             }
             if (input.getHttpMethod().equals("POST")){
-                styleQuiz = gson.fromJson(input.getBody(), StyleQuiz.class);
-                if (styleQuiz != null) {
-                    dbClient.table(styleQuizTableName, TableSchema.fromBean(StyleQuiz.class)).putItem(styleQuiz);
+                data = gson.fromJson(input.getBody(), IBelieveData.class);
+                String uuid = UUID.randomUUID().toString();
+                if (data != null) {
+                    data.setMetadata("STYLE#"+uuid);
+                    data.setCreatedDate(Instant.now());
+                    data.setLastUpdatedDate(Instant.now());
+                    dbClient.table(tableName, TableSchema.fromBean(IBelieveData.class)).putItem(data);
                 }
                 System.out.println("POST");
-                System.out.println("TABLE NAME"  + styleQuizTableName);
+                System.out.println("TABLE NAME"  + tableName);
                 output = input.getBody() + "styleQ from Post";
             }
             if (input.getHttpMethod().equals("DELETE")){

@@ -15,6 +15,6 @@ runtime = "java11"
 architecture = "x86_64"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["PostUserFunction", "GetUserFunction"]
+functions = ["PostUserFunction", "GetUserFunction", "PostRecommendationFunction", "GetRecommendationFunction"]
 
 [layer_build_definitions]

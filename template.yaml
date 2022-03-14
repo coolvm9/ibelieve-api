@@ -30,11 +30,11 @@ Resources:
       Variables:
         LAMBDA_ALIAS: !Ref Stage
       TracingEnabled: true
-      Auth:
-        DefaultAuthorizer: MyCognitoAuthorizer
-        Authorizers:
-          MyCognitoAuthorizer:
-            UserPoolArn: arn:aws:cognito-idp:us-west-1:470521481974:userpool/us-west-1_6NeBXCvcJ
+#      Auth:
+#        DefaultAuthorizer: MyCognitoAuthorizer
+#        Authorizers:
+#          MyCognitoAuthorizer:
+#            UserPoolArn: arn:aws:cognito-idp:us-west-1:470521481974:userpool/us-west-1_6NeBXCvcJ
 
 
   PostStyleQuizFunction:
@@ -43,7 +43,7 @@ Resources:
       FunctionName: PostStyleQuiz
       Description: Updates Style Quiz details into table
       CodeUri: style-quiz-service
-      Handler: ai.ibelieve.StyleQuizApp::handleRequest
+      Handler: ai.ibelieve.CreateStyleQuizHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
@@ -53,7 +53,7 @@ Resources:
         - AmazonDynamoDBFullAccess
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          STYLE_QUIZ_TABLE: StyleQuiz
+          IBELIEVE_DATA_TABLE: IBelieveData
       Events:
         StyleQuizApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -67,7 +67,7 @@ Resources:
       FunctionName: GetStyleQuiz
       Description: Get StyleQuiz By ID
       CodeUri: style-quiz-service
-      Handler: ai.ibelieve.StyleQuizApp::handleRequest
+      Handler: ai.ibelieve.GetStyleQuizHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
@@ -77,7 +77,7 @@ Resources:
         - AmazonDynamoDBFullAccess
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          STYLE_QUIZ_TABLE: StyleQuiz
+          IBELIEVE_DATA_TABLE: IBelieveData
       Events:
         StyleQuizApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -91,7 +91,7 @@ Resources:
       FunctionName: PostUser
       Description: Updates User details into table
       CodeUri: user-service
-      Handler: ai.ibelieve.UserApp::handleRequest
+      Handler: ai.ibelieve.CreateUserHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
@@ -101,12 +101,12 @@ Resources:
         - AmazonDynamoDBFullAccess
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          USER_TABLE: User
+          IBELIEVE_DATA_TABLE: IBelieveData
       Events:
         UserApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /v1/user
+            Path: /v1/users
             Method: post
             RestApiId: !Ref ibelieveApi
   GetUserFunction:
@@ -115,7 +115,7 @@ Resources:
       FunctionName: GetUser
       Description: Get User By ID
       CodeUri: user-service
-      Handler: ai.ibelieve.UserApp::handleRequest
+      Handler: ai.ibelieve.GetUserHandler::handleRequest
       Runtime: java11
       Architectures:
         - x86_64
@@ -125,12 +125,60 @@ Resources:
         - AmazonDynamoDBFullAccess
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          USER_TABLE: User
+          IBELIEVE_DATA_TABLE: IBelieveData
       Events:
         UserApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /v1/user
+            Path: /v1/users/{id}
+            Method: get
+            RestApiId: !Ref ibelieveApi
+  PostRecommendationFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: PostUser
+      Description: Updates User details into table
+      CodeUri: user-service
+      Handler: ai.ibelieve.CreateRecommendationHandler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        # Give the Lambda service access to poll your DynamoDB Stream
+        - AmazonDynamoDBFullAccess
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          IBELIEVE_DATA_TABLE: IBelieveData
+      Events:
+        UserApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /v1/recommendations
+            Method: post
+            RestApiId: !Ref ibelieveApi
+  GetRecommendationFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: GetUser
+      Description: Get User By ID
+      CodeUri: user-service
+      Handler: ai.ibelieve.CreateRecommendationHandler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        # Give the Lambda service access to poll your DynamoDB Stream
+        - AmazonDynamoDBFullAccess
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          IBELIEVE_DATA_TABLE: IBelieveData
+      Events:
+        UserApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /v1/recommendations/{id}
             Method: get
             RestApiId: !Ref ibelieveApi
 Outputs:
@@ -139,4 +187,7 @@ Outputs:
     Value: !Sub "https://${ibelieveApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/v1/stylequiz"
   UserApiEndpoint:
     Description: "API endpoint"
-    Value: !Sub "https://${ibelieveApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/v1/user"
+    Value: !Sub "https://${ibelieveApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/v1/users"
+  RecApiEndpoint:
+    Description: "API endpoint"
+    Value: !Sub "https://${ibelieveApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/v1/recommendations"

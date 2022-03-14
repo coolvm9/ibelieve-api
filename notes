@@ -2,3 +2,73 @@ sam local generate-event apigateway aws-proxy --method GET --path document --bod
 sam local invoke -d 5858 <function logical id>
 
 sam local start-api -d 5858
+
+
+version: "3"
+services:
+  dynamodb:
+    image: "dynamodb-local:latest"
+    container_name: app-dynamodb
+    ports:
+      - "80:8000"
+  api:
+    image: "app-backend:latest"
+    container_name: app-api
+    ports:
+      - "5000:5000"
+      - "5100:5100"
+    links:
+      - dynamodb
+    environment:
+      - DYNAMO_HOST=dynamodb:80
+
+
+
+Using the AWS CRT HTTP Client
+To use the HTTP client, first add aws-crt-client dependency to your pom.xml
+
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>aws-crt-client</artifactId>
+    <version>2.14.13-PREVIEW</version>
+</dependency>
+XML
+Then, configure your service to use the CRT HTTP client in one of the following ways.
+
+Option 1: Specify the CRT HTTP client through the client builder
+This is the preferred option. It allows you to customize configurations such as max connections based on your use-case.
+
+// Creating an asynchronous client with an CRT HTTP client that is managed by the SDK
+S3AsyncClient.builder()
+             .httpClientBuilder(AwsCrtAsyncHttpClient.builder()
+                                                     .maxConcurrency(50))
+             .build();
+
+// Creating an CRT HTTP Client that can be shared across multiple SDK clients.
+SdkAsyncHttpClient crtClient = AwsCrtAsyncHttpClient.create()
+S3AsyncClient.builder()
+             .httpClient(crtClient)
+             .build();
+Java
+Option 2: Remove other async HTTP clients from the classpath
+If HTTP client is not specified on the SDK client builder, the SDK will use ServiceLoader to find HTTP implementations on the classpath. With the default configuration, the SDK includes Netty HTTP client dependency, and by removing the netty-nio-client dependency and including aws-crt-client on the classpath, the SDK will use the CRT HTTP client automatically. Below is the sample POM file for an application that only has CRT HTTP client on the classpath.
+
+<dependencies>
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>s3</artifactId>
+        <version>2.14.13</version>
+        <exclusions>
+            <exclusion>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>netty-nio-client</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>aws-crt-client</artifactId>
+        <version>2.14.13-PREVIEW</version>
+    </dependency>
+ </dependencies>
