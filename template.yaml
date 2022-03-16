@@ -136,9 +136,9 @@ Resources:
   PostRecommendationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: PostUser
-      Description: Updates User details into table
-      CodeUri: user-service
+      FunctionName: PostRecommendation
+      Description: Creates Recommendation details into table
+      CodeUri: recommendation-service
       Handler: ai.ibelieve.CreateRecommendationHandler::handleRequest
       Runtime: java11
       Architectures:
@@ -160,8 +160,8 @@ Resources:
   GetRecommendationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: GetUser
-      Description: Get User By ID
+      FunctionName: GetRecommendation
+      Description: Get Recommendation By ID
       CodeUri: user-service
       Handler: ai.ibelieve.CreateRecommendationHandler::handleRequest
       Runtime: java11

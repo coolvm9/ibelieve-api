@@ -34,7 +34,7 @@ public class GetUserHandler implements  RequestHandler<APIGatewayProxyRequestEve
 
     public GetUserHandler() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
-        userTableName = DependencyFactory.userTableName();
+        userTableName = DependencyFactory.iBelieveTableName();
         userTableSchema = TableSchema.fromBean(IBelieveData.class);
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");
@@ -57,8 +57,10 @@ public class GetUserHandler implements  RequestHandler<APIGatewayProxyRequestEve
                         ", Value = " + entry.getValue());
             userId = inputParams.get("userId");
             userDynamoDbTable= dbClient.table(userTableName, TableSchema.fromBean(IBelieveData.class));
+
             key = Key.builder()
                     .partitionValue(userId)
+                    .sortValue("Profile#"+ userId)
                     .build();
             user = userDynamoDbTable.getItem(key);
             if(user!=null){

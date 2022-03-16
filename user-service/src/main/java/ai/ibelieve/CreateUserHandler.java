@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ibelieve.Constants;
 import ibelieve.db.DependencyFactory;
 import ibelieve.entities.IBelieveData;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -26,8 +27,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    static final int STATUS_CODE_NO_CONTENT = 204;
-    static final int STATUS_CODE_CREATED = 201;
+
     private final DynamoDbEnhancedClient dbClient;
     private final String tableName;
     private final TableSchema<IBelieveData> ibelieveTableSchema;
@@ -53,16 +53,18 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
         try {
             if (input.getHttpMethod().equals("POST")){
                 data = gson.fromJson(input.getBody(), IBelieveData.class);
-                String uuid = UUID.randomUUID().toString();
+//                String uuid = UUID.randomUUID().toString();
                 if (data != null) {
-                    data.setMetadata("PROFILE#"+uuid);
+                    data.setMetadata("PROFILE#"+ data.getUserId());
                     data.setCreatedDate(Instant.now());
                     data.setLastUpdatedDate(Instant.now());
                     dbClient.table(tableName, TableSchema.fromBean(IBelieveData.class)).putItem(data);
+
                 }
-                System.out.println("POST");
-                System.out.println("TABLE NAME"  + tableName);
-                output = input.getBody() ;
+                headers.put("Location", "/v1/user/"+data.getUserId());
+                response.setHeaders(headers);
+                response.withStatusCode(Constants.STATUS_CODE_CREATED);
+                output = gson.toJson(data) ;
             }
             if (input.getHttpMethod().equals("DELETE")){
                 System.out.println("DELETE");
@@ -72,7 +74,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
                 System.out.println("PUT");
                 output ="USer from PUT";
             }
-            int statusCode = STATUS_CODE_NO_CONTENT;
+            int statusCode = Constants.STATUS_CODE_NO_CONTENT;
 
             return response
                     .withStatusCode(200)

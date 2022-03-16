@@ -15,6 +15,14 @@ runtime = "java11"
 architecture = "x86_64"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["PostUserFunction", "GetUserFunction", "PostRecommendationFunction", "GetRecommendationFunction"]
+functions = ["PostUserFunction", "GetUserFunction", "GetRecommendationFunction"]
+
+[function_build_definitions.2dd8d9f8-8d15-4647-97bf-9e6d22827d8c]
+codeuri = "D:\\dev spaces\\intelliJ Workspace\\ibelieve-api\\recommendation-service"
+runtime = "java11"
+architecture = "x86_64"
+manifest_hash = ""
+packagetype = "Zip"
+functions = ["PostRecommendationFunction"]
 
 [layer_build_definitions]

@@ -37,7 +37,7 @@ public class CreateRecommendationHandler implements RequestHandler<APIGatewayPro
 
     public CreateRecommendationHandler() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
-        tableName = DependencyFactory.styleQuizTableName();
+        tableName = DependencyFactory.iBelieveTableName();
         tableSchema= TableSchema.fromBean(IBelieveData.class);
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");

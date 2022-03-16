@@ -39,7 +39,7 @@ public class CreateStyleQuizHandler implements RequestHandler<APIGatewayProxyReq
 
     public CreateStyleQuizHandler() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
-        tableName = DependencyFactory.styleQuizTableName();
+        tableName = DependencyFactory.iBelieveTableName();
         styleQuizTableSchema = TableSchema.fromBean(IBelieveData.class);
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");

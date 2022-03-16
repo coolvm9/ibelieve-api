@@ -3,24 +3,31 @@ sam local invoke -d 5858 <function logical id>
 
 sam local start-api -d 5858
 
+docker-compose up -d dynamodb-local
 
-version: "3"
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+
+sam local start-api  --docker-network abp-sam-backend
+
+
+version: '3.8'
 services:
-  dynamodb:
-    image: "dynamodb-local:latest"
-    container_name: app-dynamodb
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    networks:
+      - backend
     ports:
-      - "80:8000"
-  api:
-    image: "app-backend:latest"
-    container_name: app-api
-    ports:
-      - "5000:5000"
-      - "5100:5100"
-    links:
-      - dynamodb
-    environment:
-      - DYNAMO_HOST=dynamodb:80
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+
+networks:
+  backend:
+    name: abp-sam-backend
+
 
 
 
