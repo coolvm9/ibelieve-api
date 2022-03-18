@@ -130,7 +130,7 @@ Resources:
         UserApiEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /v1/users/{id}
+            Path: /v1/users/{userId}
             Method: get
             RestApiId: !Ref ibelieveApi
   PostRecommendationFunction:

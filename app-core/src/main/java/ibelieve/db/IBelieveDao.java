@@ -7,6 +7,9 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
 
 public class IBelieveDao {
 
@@ -29,8 +32,8 @@ public class IBelieveDao {
         try {
             if(user.getUserId()!=null) {
                 user.setMetadata("PROFILE#" + user.getUserId());
-                user.setCreatedDate(Instant.now());
-                user.setLastUpdatedDate(Instant.now());
+                user.setCreatedDate(LocalDateTime.now());
+                user.setLastUpdatedDate(LocalDateTime.now());
                 dynamoDb.table(tableName, TableSchema.fromBean(IBelieveData.class)).putItem(user);
             }
         } catch (ResourceNotFoundException e) {

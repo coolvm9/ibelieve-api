@@ -60,7 +60,7 @@ public class GetUserHandler implements  RequestHandler<APIGatewayProxyRequestEve
 
             key = Key.builder()
                     .partitionValue(userId)
-                    .sortValue("Profile#"+ userId)
+                    .sortValue("PROFILE#"+ userId)
                     .build();
             user = userDynamoDbTable.getItem(key);
             if(user!=null){

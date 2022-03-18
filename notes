@@ -7,7 +7,7 @@ docker-compose up -d dynamodb-local
 
 aws dynamodb list-tables --endpoint-url http://localhost:8000
 
-sam local start-api  --docker-network abp-sam-backend
+sam local start-api  --docker-network ibelieve-sam-backend
 
 
 version: '3.8'
@@ -26,56 +26,15 @@ services:
 
 networks:
   backend:
-    name: abp-sam-backend
+    name: ibelieve-sam-backend
 
 
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+
+aws dynamodb delete-table --table-name IBelieveData --endpoint-url http://localhost:8000
+
+aws dynamodb create-table --cli-input-json file://create-table-ibelieve1.json --endpoint-url http://localhost:8000
+
+aws dynamodb describe-table --table-name IBelieveData  --endpoint-url http://localhost:8000
 
 
-Using the AWS CRT HTTP Client
-To use the HTTP client, first add aws-crt-client dependency to your pom.xml
-
-<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>aws-crt-client</artifactId>
-    <version>2.14.13-PREVIEW</version>
-</dependency>
-XML
-Then, configure your service to use the CRT HTTP client in one of the following ways.
-
-Option 1: Specify the CRT HTTP client through the client builder
-This is the preferred option. It allows you to customize configurations such as max connections based on your use-case.
-
-// Creating an asynchronous client with an CRT HTTP client that is managed by the SDK
-S3AsyncClient.builder()
-             .httpClientBuilder(AwsCrtAsyncHttpClient.builder()
-                                                     .maxConcurrency(50))
-             .build();
-
-// Creating an CRT HTTP Client that can be shared across multiple SDK clients.
-SdkAsyncHttpClient crtClient = AwsCrtAsyncHttpClient.create()
-S3AsyncClient.builder()
-             .httpClient(crtClient)
-             .build();
-Java
-Option 2: Remove other async HTTP clients from the classpath
-If HTTP client is not specified on the SDK client builder, the SDK will use ServiceLoader to find HTTP implementations on the classpath. With the default configuration, the SDK includes Netty HTTP client dependency, and by removing the netty-nio-client dependency and including aws-crt-client on the classpath, the SDK will use the CRT HTTP client automatically. Below is the sample POM file for an application that only has CRT HTTP client on the classpath.
-
-<dependencies>
-    <dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>s3</artifactId>
-        <version>2.14.13</version>
-        <exclusions>
-            <exclusion>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>netty-nio-client</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
-
-    <dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>aws-crt-client</artifactId>
-        <version>2.14.13-PREVIEW</version>
-    </dependency>
- </dependencies>

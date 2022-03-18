@@ -17,6 +17,9 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,8 +64,8 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
 //                String uuid = UUID.randomUUID().toString();
                 if (data != null) {
                     data.setMetadata("PROFILE#"+ data.getUserId());
-                    data.setCreatedDate(Instant.now());
-                    data.setLastUpdatedDate(Instant.now());
+                    data.setCreatedDate(LocalDateTime.now());
+                    data.setLastUpdatedDate(LocalDateTime.now());
                     dbClient.table(tableName, TableSchema.fromBean(IBelieveData.class)).putItem(data);
 
                 }
