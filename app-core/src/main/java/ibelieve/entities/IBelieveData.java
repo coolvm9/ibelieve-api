@@ -36,7 +36,7 @@ public class IBelieveData {
     private boolean subscribe;
 
 
-  /*  private String styleId;
+    private String styleId;
     private List<String> occasion;
     private List<String> dressingStyle;
     private List<String> weather;
@@ -50,6 +50,7 @@ public class IBelieveData {
     private String underTone;
     private String skinTone;
     private List<String> brands;
+
     private List<String> topStyle;
     private List<String> neckStyle;
     private List<String> sleeveStyle;
@@ -60,7 +61,7 @@ public class IBelieveData {
     private List<String> colorPalatte;
     private List<String> patternStyle;
     private List<String> fabricAllergies;
-    private List<String> socialMedia;*/
+    private List<String> socialMedia;
 
 
     @DynamoDbSortKey
@@ -81,6 +82,7 @@ public class IBelieveData {
 
     @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)
     @DynamoDbConvertedBy(LocalDateTimeAttributeConverter.class)
+
     public LocalDateTime getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
 
