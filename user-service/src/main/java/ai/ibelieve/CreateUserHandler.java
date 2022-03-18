@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ibelieve.Constants;
 import ibelieve.db.DependencyFactory;
+import ibelieve.db.IBelieveDao;
 import ibelieve.entities.IBelieveData;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
@@ -19,6 +20,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.inject.Inject;
 
 /**
  * Handler for requests to Lambda function.
@@ -33,6 +35,9 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
     private final TableSchema<IBelieveData> ibelieveTableSchema;
     private Map<String, String> headers = new HashMap<>();
     private Region REGION = Region.US_WEST_1;
+
+    @Inject
+    IBelieveDao believeDao;
 
     public CreateUserHandler() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
