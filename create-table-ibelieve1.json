@@ -1,0 +1,27 @@
+{
+    "TableName": "IBelieveData",
+    "KeySchema": [
+            {
+                "AttributeName": "userId",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "metadata",
+                "KeyType": "RANGE"
+            }
+        ],
+    "AttributeDefinitions": [
+            {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "metadata",
+                "AttributeType": "S"
+            }
+        ],
+    "ProvisionedThroughput": {
+        "ReadCapacityUnits": 1,
+        "WriteCapacityUnits": 1
+    }
+}
