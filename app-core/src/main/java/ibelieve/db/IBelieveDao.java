@@ -3,13 +3,11 @@ package ibelieve.db;
 import ibelieve.entities.IBelieveData;
 import ibelieve.exception.EntityDoesNotExistException;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 
 public class IBelieveDao {
 
@@ -17,8 +15,17 @@ public class IBelieveDao {
     private final DynamoDbEnhancedClient dynamoDb;
     private final int pageSize;
 
+    private static IBelieveDao instance = null;
 
-    public IBelieveDao( DynamoDbEnhancedClient dynamoDb,  String tableName,
+    public static IBelieveDao getInstance(DynamoDbEnhancedClient dynamoDb,  String tableName,
+                                           int pageSize){
+        if(instance!=null)
+            return instance;
+        instance = new IBelieveDao(dynamoDb,tableName,pageSize);
+        return instance;
+    }
+
+    private IBelieveDao( DynamoDbEnhancedClient dynamoDb,  String tableName,
                      int pageSize) {
         this.dynamoDb = dynamoDb;
         this.tableName = tableName;
@@ -41,5 +48,26 @@ public class IBelieveDao {
         }
         return user;
     }
+
+    public IBelieveData getUser( String  userId) {
+        IBelieveData user;
+        if (userId == null ) {
+            throw new IllegalArgumentException("UserId is null");
+        }
+        try {
+            Key key = Key.builder()
+                    .partitionValue(userId)
+                    .sortValue("PROFILE#"+ userId)
+                    .build();
+            user = dynamoDb.table(tableName, TableSchema.fromBean(IBelieveData.class)).getItem(key);
+        } catch (ResourceNotFoundException e) {
+            throw new EntityDoesNotExistException("Table " + tableName + " does not exist");
+        }
+        return user;
+    }
+
+
+
+
 
 }

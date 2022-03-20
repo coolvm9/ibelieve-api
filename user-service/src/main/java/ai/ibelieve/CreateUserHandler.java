@@ -39,7 +39,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
     private Map<String, String> headers = new HashMap<>();
     private Region REGION = Region.US_WEST_1;
 
-    @Inject
+
     IBelieveDao believeDao;
 
     public CreateUserHandler() {
@@ -48,6 +48,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
         ibelieveTableSchema = TableSchema.fromBean(IBelieveData.class);
         headers.put("Content-Type", "application/json");
         headers.put("X-Custom-Header", "application/json");
+        believeDao = IBelieveDao.getInstance(dbClient,tableName,10);
     }
 
 
@@ -61,13 +62,8 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
         try {
             if (input.getHttpMethod().equals("POST")){
                 data = gson.fromJson(input.getBody(), IBelieveData.class);
-//                String uuid = UUID.randomUUID().toString();
                 if (data != null) {
-                    data.setMetadata("PROFILE#"+ data.getUserId());
-                    data.setCreatedDate(LocalDateTime.now());
-                    data.setLastUpdatedDate(LocalDateTime.now());
-                    dbClient.table(tableName, TableSchema.fromBean(IBelieveData.class)).putItem(data);
-
+                    believeDao.createUser(data);
                 }
                 headers.put("Location", "/v1/user/"+data.getUserId());
                 response.setHeaders(headers);
@@ -82,8 +78,6 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
                 System.out.println("PUT");
                 output ="USer from PUT";
             }
-            int statusCode = Constants.STATUS_CODE_NO_CONTENT;
-
             return response
                     .withStatusCode(200)
                     .withBody(output);

@@ -133,6 +133,30 @@ Resources:
             Path: /v1/users/{userId}
             Method: get
             RestApiId: !Ref ibelieveApi
+  GetUsersListFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: GetUsersList
+      Description: Get Users
+      CodeUri: user-service
+      Handler: ai.ibelieve.GetUsersListHandler::handleRequest
+      Runtime: java11
+      Architectures:
+        - x86_64
+      MemorySize: 512
+      Policies:
+        # Give the Lambda service access to poll your DynamoDB Stream
+        - AmazonDynamoDBFullAccess
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          IBELIEVE_DATA_TABLE: IBelieveData
+      Events:
+        UserApiEvent:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /v1/users
+            Method: get
+            RestApiId: !Ref ibelieveApi
   PostRecommendationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:

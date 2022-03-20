@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class GetUserHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class GetUsersListHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private final DynamoDbEnhancedClient dbClient;
     private final String userTableName;
@@ -31,7 +31,7 @@ public class GetUserHandler implements RequestHandler<APIGatewayProxyRequestEven
     private Region REGION = Region.US_WEST_1;
 
 
-    public GetUserHandler() {
+    public GetUsersListHandler() {
         dbClient = DependencyFactory.dynamoDbEnhancedClient();
         userTableName = DependencyFactory.iBelieveTableName();
         userTableSchema = TableSchema.fromBean(IBelieveData.class);
@@ -44,25 +44,11 @@ public class GetUserHandler implements RequestHandler<APIGatewayProxyRequestEven
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
-        IBelieveData user;
-        String userId;
-        Map<String, String> inputParams;
         LambdaLogger logger = context.getLogger();
         try {
-            inputParams = input.getPathParameters();
-            for (Map.Entry<String, String> entry : inputParams.entrySet())
-                logger.log("Key = " + entry.getKey() +
-                        ", Value = " + entry.getValue());
-            userId = inputParams.get("userId");
-            user = believeDao.getUser(userId);
-            if (user != null) {
-                return response
-                        .withStatusCode(200)
-                        .withBody(gson.toJson(user));
-            } else
-                return response
-                        .withStatusCode(404)
-                        .withBody("User with ID: '" + userId + "' not found.");
+            return response
+                    .withStatusCode(200)
+                    .withBody("TO BE IMPLEMENTED");
         } catch (Exception e) {
             logger.log("Error " + e.getMessage());
             return response
